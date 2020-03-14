@@ -2,13 +2,29 @@ from pathlib import Path
 
 INPUT_FILE_NAME = ""
 
-def main():
-    input_file_path: Path = Path("INPUT_FILE_NAME")
-    input_text: str = input_file_path.read_text()
-    parsed_input = process_input(str)
+
+def main_1(parsed_input) -> None:
+    print("Computing answer for part 1...")
+
+
+def main_2(parsed_input) -> None:
+    print("Computing answer for part 2...")
+
 
 def process_input(raw_text: str) -> :
-    return raw_text
+    input_file_path: Path = Path(INPUT_FILE_NAME)
+    input_text: str = input_file_path.read_text()
+
+    # process input here
+
+    return ""
+
 
 if __name__ == "__main__":
-    main()
+    print()
+    print("Parsing input...")
+    parsed_input = parse_input()
+    print()
+    main_1(parsed_input)
+    print()
+    main_2(parsed_input)
