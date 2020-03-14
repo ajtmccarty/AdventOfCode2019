@@ -1,0 +1,14 @@
+from pathlib import Path
+
+INPUT_FILE_NAME = ""
+
+def main():
+    input_file_path: Path = Path("INPUT_FILE_NAME")
+    input_text: str = input_file_path.read_text()
+    parsed_input = process_input(str)
+
+def process_input(raw_text: str) -> :
+    return raw_text
+
+if __name__ == "__main__":
+    main()
