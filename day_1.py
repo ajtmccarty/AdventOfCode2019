@@ -1,11 +1,10 @@
-import argparse
+from argparse import ArgumentParser
 import doctest
 from math import floor
 from pathlib import Path
-import sys
 from typing import List
 
-INPUT_FILE_NAME = "input_1.txt"
+DEFAULT_INPUT_FILE_PATH = "input_1.txt"
 
 
 def main_1(module_masses: List[int]) -> int:
@@ -16,9 +15,11 @@ def main_2(module_masses: List[int]) -> int:
     return sum([fuel_requirement(mod_mass, add_fuel_for_fuel=True) for mod_mass in module_masses])
 
 
-def parse_input() -> List[int]:
-    input_file_path: Path = Path(INPUT_FILE_NAME)
-    input_text: str = input_file_path.read_text()
+def parse_input(input_path: Path) -> List[int]:
+    if not input_path.exists():
+        print(f"Bad input path. '{input_path}' does not exist.")
+        return []
+    input_text: str = input_path.read_text()
     module_masses: List[int] = []
     for str_mod_mass in input_text.split("\n"):
         stripped_mod_mass: str = str_mod_mass.strip()
@@ -59,10 +60,15 @@ def fuel_requirement(module_mass: int, add_fuel_for_fuel: bool = False) -> int:
     return fuel_required + fuel_requirement(fuel_required, add_fuel_for_fuel)
 
 
-if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser()
+def build_arg_parser() -> ArgumentParser:
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH)
     arg_parser.add_argument("-r", "--run", help="Run the solution", action="store_true")
     arg_parser.add_argument("-t", "--test", help="Run the tests for this solution", action="store_true")
+    return arg_parser
+
+
+def run(arg_parser: ArgumentParser) -> None:
     args = arg_parser.parse_args()
 
     if args.test:
@@ -71,13 +77,22 @@ if __name__ == "__main__":
         if not failures:
             print(f"Ran {num_tests} test, 0 failures")
         else:
-            sys.exit(1)
+            return
+
     if not args.test or args.run:
         print("Parsing input...")
-        parsed_input = parse_input()
+        parsed_input = parse_input(Path(args.input))
+        if not parsed_input:
+            print("Could not parse input.")
+            return
         print("Computing answer for part 1...")
         answer_1 = main_1(parsed_input)
         print(f"Answer for part 1: {answer_1}")
         print("Computing answer for part 2...")
         answer_2 = main_2(parsed_input)
         print(f"Answer for part 2: {answer_2}")
+
+
+if __name__ == "__main__":
+    parser = build_arg_parser()
+    run(parser)
