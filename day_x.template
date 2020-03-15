@@ -16,8 +16,8 @@ def main_2(parsed_input) ->:
 def parse_input(input_path: Path) -> :
     if not input_path.exists():
         print(f"Bad input path. '{input_path}' does not exist.")
-        sys.exit(1)
-    input_text: str = input_file_path.read_text()
+        return
+    input_text: str = input_path.read_text()
 
     # process input here
 
