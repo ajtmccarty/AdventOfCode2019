@@ -5,15 +5,15 @@ from pathlib import Path
 DEFAULT_INPUT_FILE_PATH = ""
 
 
-def main_1(parsed_input) ->:
+def main_1(parsed_input) -> None:
     return None
 
 
-def main_2(parsed_input) ->:
+def main_2(parsed_input) -> None:
     return None
 
 
-def parse_input(input_path: Path) -> :
+def parse_input(input_path: Path) -> List:
     if not input_path.exists():
         print(f"Bad input path. '{input_path}' does not exist.")
         return
@@ -21,7 +21,7 @@ def parse_input(input_path: Path) -> :
 
     # process input here
 
-    return ""
+    return []
 
 
 def build_arg_parser() -> ArgumentParser:
