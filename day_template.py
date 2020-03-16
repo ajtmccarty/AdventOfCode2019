@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import doctest
 from pathlib import Path
+from typing import List
 
 DEFAULT_INPUT_FILE_PATH = ""
 
@@ -16,7 +17,7 @@ def main_2(parsed_input) -> None:
 def parse_input(input_path: Path) -> List:
     if not input_path.exists():
         print(f"Bad input path. '{input_path}' does not exist.")
-        return
+        return []
     input_text: str = input_path.read_text()
 
     # process input here
