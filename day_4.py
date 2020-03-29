@@ -1,43 +1,105 @@
 """Solution for https://adventofcode.com/2019/day/4"""
 from argparse import ArgumentParser
 import doctest
-from math import floor
-from typing import List
+from typing import List, Optional, Tuple
 
 
 def main_1(start: int, end: int) -> int:
-    """Sad brute force solution"""
+    """Sad brute force solution
+    >>> main_1(372304, 847060)
+    475
+    """
     return sum(
-        [_is_valid(num) for num in range(start, end + 1)]
+        [_is_valid_1(num) for num in range(start, end + 1)]
     )
 
 
-def main_2(start, end) -> None:
-    return None
-
-
-def _is_valid(number: int):
+def main_2(start, end) -> int:
+    """Also a brute force solution
+    >>> main_2(372304, 847060)
+    297
     """
-    >>> _is_valid(111111)
+    return sum(
+        [_is_valid_2(num) for num in range(start, end + 1)]
+    )
+
+
+def _is_valid_1(number: int):
+    """
+    >>> _is_valid_1(111111)
     True
-    >>> _is_valid(223450)
+    >>> _is_valid_1(223450)
     False
-    >>> _is_valid(123789)
+    >>> _is_valid_1(123789)
     False
 
     :param number: number to check
     :return: bool, True if number passes the checks
     """
+    chunks = _chunkify(str(number))
     has_double: bool = False
-    str_number: str = str(number)
-    index: int = 1
-    while index < len(str_number):
-        if not has_double and str_number[index] == str_number[index - 1]:
+    previous_int: Optional[int] = None
+    for char, count in chunks:
+        if count >= 2:
             has_double = True
-        if str_number[index] < str_number[index - 1]:
+        if previous_int and previous_int > int(char):
             return False
-        index += 1
+        previous_int = int(char)
     return has_double
+
+
+def _is_valid_2(number: int):
+    """
+    >>> _is_valid_2(112233)
+    True
+    >>> _is_valid_2(123444)
+    False
+    >>> _is_valid_2(111122)
+    True
+
+    :param number: number to check
+    :return: bool, True if number passes the checks
+    """
+    chunks = _chunkify(str(number))
+    has_double: bool = False
+    previous_int: Optional[int] = None
+    for char, count in chunks:
+        if count == 2:
+            has_double = True
+        if previous_int and previous_int > int(char):
+            return False
+        previous_int = int(char)
+    return has_double
+
+
+def _chunkify(input_str: str):
+    """Return a list of tuples where each tuple is a single character and an integer
+    indicating how many of that character occur in a row.
+
+    >>> _chunkify("111")
+    [('1', 3)]
+    >>> _chunkify("1122")
+    [('1', 2), ('2', 2)]
+    >>> _chunkify("1234")
+    [('1', 1), ('2', 1), ('3', 1), ('4', 1)]
+    >>> _chunkify("121")
+    [('1', 1), ('2', 1), ('1', 1)]
+
+    :param input_str: string to turn into chunks
+    :return: List of tuples where each tuple is a length-1 string and an integer
+    """
+    chunks: List[Tuple[str, int]] = []
+    previous_char: str = input_str[0]
+    count: int = 1
+    for i in range(1, len(input_str)):
+        if input_str[i] == previous_char:
+            count += 1
+            continue
+        chunks.append((previous_char, count))
+        previous_char = input_str[i]
+        count = 1
+    chunks.append((previous_char, count))
+    return chunks
 
 
 def build_arg_parser() -> ArgumentParser:
