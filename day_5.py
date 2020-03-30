@@ -70,6 +70,7 @@ class IntCodeCommand(abc.ABC):
             "04": OutputCommand,
             "05": JumpIfTrueCommand,
             "06": JumpIfFalseCommand,
+            "07": LessThanCommand,
             "99": ExitCommand,
         }
         try:
@@ -210,6 +211,37 @@ class JumpIfFalseCommand(IntCodeCommand):
         if param_to_check == 0:
             return {"position": jump_to_ind}
         return {}
+
+
+class LessThanCommand(IntCodeCommand):
+    """If first input is less than second, store 1 into output, otherwise store 0 into output
+
+    >>> icp = IntCodeProgram(["7", "3", "5", "4", "0", "27"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["7", "3", "5", "4", "1", "27"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["7", "3", "4", "5", "-22", "27", "88"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["7", "3", "4", "5", "-22", "0", "88"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["1107", "3", "4", "4", "-22"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1107", "3", "4", "4", "1"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["1107", "10", "4", "4", "-22"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1107", "10", "4", "4", "0"]
+    >>> assert icp.position == 4
+    """
+
+    command_params = CommandParams(input_indices=[0, 1], output_indices=[2])
+
+    def execute(self, num1: int, num2: int, out_index: int) -> dict:
+        if num1 < num2:
+            result = "1"
+        else:
+            result = "0"
+        return {out_index: result}
 
 
 class ExitCommand(IntCodeCommand):
