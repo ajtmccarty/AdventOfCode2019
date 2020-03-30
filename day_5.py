@@ -69,6 +69,7 @@ class IntCodeCommand(abc.ABC):
             "03": InputCommand,
             "04": OutputCommand,
             "05": JumpIfTrueCommand,
+            "06": JumpIfFalseCommand,
             "99": ExitCommand,
         }
         try:
@@ -177,6 +178,36 @@ class JumpIfTrueCommand(IntCodeCommand):
 
     def execute(self, param_to_check: int, jump_to_ind: int) -> dict:
         if param_to_check != 0:
+            return {"position": jump_to_ind}
+        return {}
+
+
+class JumpIfFalseCommand(IntCodeCommand):
+    """
+    JumpIfFalse command returns a new pointer index if the first input is zero
+
+    >>> icp = IntCodeProgram(["6", "3", "4", "0", "27"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["6", "3", "4", "0", "27"]
+    >>> assert icp.position == 27
+    >>> icp = IntCodeProgram(["06", "3", "4", "1", "21"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["06", "3", "4", "1", "21"]
+    >>> assert icp.position == 3
+    >>> icp = IntCodeProgram(["1106", "0", "4"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1106", "0", "4"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["1106", "3", "4", "1", "21"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1106", "3", "4", "1", "21"]
+    >>> assert icp.position == 3
+    """
+
+    command_params = CommandParams(input_indices=[0, 1], output_indices=[])
+
+    def execute(self, param_to_check: int, jump_to_ind: int) -> dict:
+        if param_to_check == 0:
             return {"position": jump_to_ind}
         return {}
 
