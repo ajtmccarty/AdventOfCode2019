@@ -106,6 +106,7 @@ class IntCodeCommand(abc.ABC):
 
 class AddCommand(IntCodeCommand):
     """Add command takes 2 inputs and returns 1 output"""
+
     command_params = CommandParams(input_indices=[0, 1], output_indices=[2])
 
     def execute(self, num1: int, num2: int, out_index: int) -> Dict[int, Any]:
@@ -115,6 +116,7 @@ class AddCommand(IntCodeCommand):
 
 class MultiplyCommand(IntCodeCommand):
     """Add command takes 2 inputs and returns 1 output"""
+
     command_params = CommandParams(input_indices=[0, 1], output_indices=[2])
 
     def execute(self, num1: int, num2: int, out_index: int) -> Dict[int, Any]:
@@ -130,6 +132,7 @@ class InputCommand(IntCodeCommand):
     >>> icp._run_instruction()
     >>> assert icp.command_list[2] == "1"
     """
+
     command_params = CommandParams(input_indices=[], output_indices=[0])
 
     def execute(self, in_index: int) -> Dict[int, Any]:
@@ -147,6 +150,7 @@ class OutputCommand(IntCodeCommand):
     >>> icp._run_instruction()
     7
     """
+
     command_params = CommandParams(input_indices=[0], output_indices=[])
 
     def execute(self, int_to_output: int) -> Dict[int, Any]:
@@ -162,7 +166,6 @@ class ExitCommand(IntCodeCommand):
 
 
 class IntCodeProgram:
-
     def __init__(self, command_list: List[str]):
         # so we don't modify the input list in place
         self.command_list: List[str] = command_list.copy()
@@ -187,7 +190,9 @@ class IntCodeProgram:
         """
         # get the class for the command
         instr: str = self.command_list[self.position]
-        command_class: IntCodeCommand = IntCodeCommand.get_command_from_instruction(instr)
+        command_class: IntCodeCommand = IntCodeCommand.get_command_from_instruction(
+            instr
+        )
         # get the arguments we send to the command
         command_params: CommandParams = command_class.get_command_params()
         command_args = self.__get_input_params(instr, command_params)
@@ -199,7 +204,9 @@ class IntCodeProgram:
         # increment the position appropriately
         self.position += command_params.num_params + 1
 
-    def __get_input_params(self, instr: str, command_params: CommandParams) -> List[int]:
+    def __get_input_params(
+        self, instr: str, command_params: CommandParams
+    ) -> List[int]:
         """Get the actual input for a given instruction
 
         :param instr: raw instruction
@@ -239,11 +246,15 @@ class IntCodeProgram:
         expected_len: int = 2 + command_params.num_params
         instr = "0" * (expected_len - len(instr)) + instr
         # reverse order b/c the rightmost param mode goes with the first param
-        param_modes: str = instr[:command_params.num_params][::-1]
-        instr_args: List[str] = self.command_list[self.position + 1: self.position + command_params.num_params + 2]
+        param_modes: str = instr[: command_params.num_params][::-1]
+        instr_args: List[str] = self.command_list[
+            self.position + 1 : self.position + command_params.num_params + 2
+        ]
         final_args: List[int] = []
         # loops over a tuple of parameter mode, value of instruction, index of parameter relative to instruction
-        for (p_mode, arg, index) in zip(param_modes, instr_args, range(command_params.num_params)):
+        for (p_mode, arg, index) in zip(
+            param_modes, instr_args, range(command_params.num_params)
+        ):
             # input params
             if command_params.is_index_input(index):
                 # position mode
@@ -273,9 +284,13 @@ def parse_input(input_path: Path) -> List[str]:
 
 def build_arg_parser() -> ArgumentParser:
     arg_parser = ArgumentParser()
-    arg_parser.add_argument("-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH)
+    arg_parser.add_argument(
+        "-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH
+    )
     arg_parser.add_argument("-r", "--run", help="Run the solution", action="store_true")
-    arg_parser.add_argument("-t", "--test", help="Run the tests for this solution", action="store_true")
+    arg_parser.add_argument(
+        "-t", "--test", help="Run the tests for this solution", action="store_true"
+    )
     return arg_parser
 
 

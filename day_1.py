@@ -13,7 +13,12 @@ def main_1(module_masses: List[int]) -> int:
 
 
 def main_2(module_masses: List[int]) -> int:
-    return sum([fuel_requirement(mod_mass, add_fuel_for_fuel=True) for mod_mass in module_masses])
+    return sum(
+        [
+            fuel_requirement(mod_mass, add_fuel_for_fuel=True)
+            for mod_mass in module_masses
+        ]
+    )
 
 
 def parse_input(input_path: Path) -> List[int]:
@@ -63,9 +68,13 @@ def fuel_requirement(module_mass: int, add_fuel_for_fuel: bool = False) -> int:
 
 def build_arg_parser() -> ArgumentParser:
     arg_parser = ArgumentParser()
-    arg_parser.add_argument("-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH)
+    arg_parser.add_argument(
+        "-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH
+    )
     arg_parser.add_argument("-r", "--run", help="Run the solution", action="store_true")
-    arg_parser.add_argument("-t", "--test", help="Run the tests for this solution", action="store_true")
+    arg_parser.add_argument(
+        "-t", "--test", help="Run the tests for this solution", action="store_true"
+    )
     return arg_parser
 
 

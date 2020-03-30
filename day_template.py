@@ -27,9 +27,13 @@ def parse_input(input_path: Path) -> List:
 
 def build_arg_parser() -> ArgumentParser:
     arg_parser = ArgumentParser()
-    arg_parser.add_argument("-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH)
+    arg_parser.add_argument(
+        "-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH
+    )
     arg_parser.add_argument("-r", "--run", help="Run the solution", action="store_true")
-    arg_parser.add_argument("-t", "--test", help="Run the tests for this solution", action="store_true")
+    arg_parser.add_argument(
+        "-t", "--test", help="Run the tests for this solution", action="store_true"
+    )
     return arg_parser
 
 

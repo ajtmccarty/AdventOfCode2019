@@ -43,11 +43,7 @@ def main_2(parsed_input) -> int:
 
 
 class IntCodeProgram:
-    command_map: dict = {
-        1: "execute_add",
-        2: "execute_multiply",
-        99: "set_exit"
-    }
+    command_map: dict = {1: "execute_add", 2: "execute_multiply", 99: "set_exit"}
 
     def __init__(self, command_list: List[int]):
         # so we don't modify the input list in place
@@ -144,9 +140,13 @@ def parse_input(input_path: Path) -> List[int]:
 
 def build_arg_parser() -> ArgumentParser:
     arg_parser = ArgumentParser()
-    arg_parser.add_argument("-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH)
+    arg_parser.add_argument(
+        "-i", "--input", help="Path for input file", default=DEFAULT_INPUT_FILE_PATH
+    )
     arg_parser.add_argument("-r", "--run", help="Run the solution", action="store_true")
-    arg_parser.add_argument("-t", "--test", help="Run the tests for this solution", action="store_true")
+    arg_parser.add_argument(
+        "-t", "--test", help="Run the tests for this solution", action="store_true"
+    )
     return arg_parser
 
 

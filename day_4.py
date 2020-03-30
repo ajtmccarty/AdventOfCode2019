@@ -9,9 +9,7 @@ def main_1(start: int, end: int) -> int:
     >>> main_1(372304, 847060)
     475
     """
-    return sum(
-        [_is_valid_1(num) for num in range(start, end + 1)]
-    )
+    return sum([_is_valid_1(num) for num in range(start, end + 1)])
 
 
 def main_2(start, end) -> int:
@@ -19,9 +17,7 @@ def main_2(start, end) -> int:
     >>> main_2(372304, 847060)
     297
     """
-    return sum(
-        [_is_valid_2(num) for num in range(start, end + 1)]
-    )
+    return sum([_is_valid_2(num) for num in range(start, end + 1)])
 
 
 def _is_valid_1(number: int):
@@ -106,7 +102,9 @@ def build_arg_parser() -> ArgumentParser:
     arg_parser = ArgumentParser()
     arg_parser.add_argument("-s", "--start", type=int, help="Beginning of range")
     arg_parser.add_argument("-e", "--end", type=int, help="End of range")
-    arg_parser.add_argument("-t", "--test", help="Run the tests for this solution", action="store_true")
+    arg_parser.add_argument(
+        "-t", "--test", help="Run the tests for this solution", action="store_true"
+    )
     return arg_parser
 
 
