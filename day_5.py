@@ -68,6 +68,7 @@ class IntCodeCommand(abc.ABC):
             "02": MultiplyCommand,
             "03": InputCommand,
             "04": OutputCommand,
+            "05": JumpIfTrueCommand,
             "99": ExitCommand,
         }
         try:
@@ -81,11 +82,12 @@ class IntCodeCommand(abc.ABC):
         return cls.command_params
 
     @abc.abstractmethod
-    def execute(self, *args) -> Dict[int, Any]:
+    def execute(self, *args) -> dict:
         """To be implemented by sub-classes
 
         Must return a Dict that maps index to updated value(s)
-        The 'None' key in the Dict indicates something that should be output to the user
+        The "position" key in the dict indicates that the programs position should be updated
+        to a certain index
         """
         raise NotImplementedError("Cannot run 'execute' on base IntCodeCommand class")
 
@@ -95,7 +97,7 @@ class AddCommand(IntCodeCommand):
 
     command_params = CommandParams(input_indices=[0, 1], output_indices=[2])
 
-    def execute(self, num1: int, num2: int, out_index: int) -> Dict[int, Any]:
+    def execute(self, num1: int, num2: int, out_index: int) -> dict:
         result: int = num1 + num2
         return {out_index: str(result)}
 
@@ -105,7 +107,7 @@ class MultiplyCommand(IntCodeCommand):
 
     command_params = CommandParams(input_indices=[0, 1], output_indices=[2])
 
-    def execute(self, num1: int, num2: int, out_index: int) -> Dict[int, Any]:
+    def execute(self, num1: int, num2: int, out_index: int) -> dict:
         result: int = num1 * num2
         return {out_index: str(result)}
 
@@ -126,7 +128,7 @@ class InputCommand(IntCodeCommand):
     def set_default_input(cls, default: Any):
         cls.default_input = default
 
-    def execute(self, in_index: int) -> Dict[int, Any]:
+    def execute(self, in_index: int) -> dict:
         return {in_index: self.default_input}
 
 
@@ -144,8 +146,38 @@ class OutputCommand(IntCodeCommand):
 
     command_params = CommandParams(input_indices=[0], output_indices=[])
 
-    def execute(self, int_to_output: int) -> Dict[int, Any]:
+    def execute(self, int_to_output: int) -> dict:
         print(int_to_output)
+        return {}
+
+
+class JumpIfTrueCommand(IntCodeCommand):
+    """
+    JumpIfTrue command returns a new pointer index if the first input is nonzero
+
+    >>> icp = IntCodeProgram(["5", "3", "4", "0", "27"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["5", "3", "4", "0", "27"]
+    >>> assert icp.position == 3
+    >>> icp = IntCodeProgram(["05", "3", "4", "1", "21"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["05", "3", "4", "1", "21"]
+    >>> assert icp.position == 21
+    >>> icp = IntCodeProgram(["1105", "0", "4"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1105", "0", "4"]
+    >>> assert icp.position == 3
+    >>> icp = IntCodeProgram(["1105", "3", "4", "1", "21"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1105", "3", "4", "1", "21"]
+    >>> assert icp.position == 4
+    """
+
+    command_params = CommandParams(input_indices=[0, 1], output_indices=[])
+
+    def execute(self, param_to_check: int, jump_to_ind: int) -> dict:
+        if param_to_check != 0:
+            return {"position": jump_to_ind}
         return {}
 
 
@@ -191,10 +223,17 @@ class IntCodeProgram:
         # run the command
         output_map = command_class.execute(*command_args)
         # update the indices with the value(s) returned from the command
+        has_jumped: bool = False
         for index, value in output_map.items():
-            self.command_list[index] = value
+            # special handling for jump commands
+            if index == "position":
+                self.position = value
+                has_jumped = True
+            else:
+                self.command_list[index] = value
         # increment the position appropriately
-        self.position += command_params.num_params + 1
+        if not has_jumped:
+            self.position += command_params.num_params + 1
 
     def __get_input_params(
         self, instr: str, command_params: CommandParams
