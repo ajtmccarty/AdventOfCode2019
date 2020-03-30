@@ -21,27 +21,13 @@ class EndOfProgramError(Exception):
 
 def main_1(parsed_input) -> None:
     """Expected answer for sample input: 7259358"""
+    InputCommand.set_default_input("1")
     icp = IntCodeProgram(parsed_input)
     icp.run()
 
 
-def main_2(parsed_input) -> int:
-    # this brute force solution is lame, but i could not think
-    # of a way to reverse engineer the starting input
-    # for example, if i know that two numbers must multiply to 19690720,
-    # how could i possibly determine what those numbers are?
-    for i in range(100):
-        for j in range(100):
-            print(f"Noun: {i}, Verb: {j}")
-            icp = IntCodeProgram(parsed_input)
-            icp.command_list[1] = i
-            icp.command_list[2] = j
-            try:
-                icp.run()
-            except (UnknownCommandError, EndOfProgramError):
-                continue
-            if icp.command_list[0] == 19690720:
-                return 100 * i + j
+def main_2(parsed_input) -> None:
+    InputCommand.set_default_input("1")
 
 
 class CommandParams:
@@ -127,16 +113,21 @@ class MultiplyCommand(IntCodeCommand):
 class InputCommand(IntCodeCommand):
     """Input command just sends a value to 1 output
 
-
+    >>> InputCommand.set_default_input("5")
     >>> icp = IntCodeProgram(["103", "2", "34"])
     >>> icp._run_instruction()
-    >>> assert icp.command_list[2] == "1"
+    >>> assert icp.command_list[2] == "5"
     """
 
     command_params = CommandParams(input_indices=[], output_indices=[0])
+    default_input: Any = "1"
+
+    @classmethod
+    def set_default_input(cls, default: Any):
+        cls.default_input = default
 
     def execute(self, in_index: int) -> Dict[int, Any]:
-        return {in_index: "1"}
+        return {in_index: self.default_input}
 
 
 class OutputCommand(IntCodeCommand):
@@ -184,6 +175,7 @@ class IntCodeProgram:
         >>> icp = IntCodeProgram(["1101", "7", "3", "3"])
         >>> icp._run_instruction()
         >>> assert icp.command_list[3] == "10"
+        >>> InputCommand.set_default_input("1")
         >>> icp = IntCodeProgram(["3", "4", "3", "3", "59"])
         >>> icp._run_instruction()
         >>> assert icp.command_list[4] == "1"
