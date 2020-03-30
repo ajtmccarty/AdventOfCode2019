@@ -5,8 +5,7 @@ import abc
 from argparse import ArgumentParser
 import doctest
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Tuple
-import sys
+from typing import Any, ClassVar, List
 
 DEFAULT_INPUT_FILE_PATH = "input_5.txt"
 
@@ -27,7 +26,10 @@ def main_1(parsed_input) -> None:
 
 
 def main_2(parsed_input) -> None:
-    InputCommand.set_default_input("1")
+    """Expected answer for sample input: 11826654"""
+    InputCommand.set_default_input("5")
+    icp = IntCodeProgram(parsed_input)
+    icp.run()
 
 
 class CommandParams:
@@ -71,6 +73,7 @@ class IntCodeCommand(abc.ABC):
             "05": JumpIfTrueCommand,
             "06": JumpIfFalseCommand,
             "07": LessThanCommand,
+            "08": EqualsCommand,
             "99": ExitCommand,
         }
         try:
@@ -244,11 +247,42 @@ class LessThanCommand(IntCodeCommand):
         return {out_index: result}
 
 
+class EqualsCommand(IntCodeCommand):
+    """If first input is less than second, store 1 into output, otherwise store 0 into output
+
+    >>> icp = IntCodeProgram(["0008", "3", "5", "4", "0", "4"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["0008", "3", "5", "4", "1", "4"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["8", "3", "4", "5", "-22", "27", "88"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["8", "3", "4", "5", "-22", "0", "88"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["1108", "3", "4", "4", "-22"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1108", "3", "4", "4", "0"]
+    >>> assert icp.position == 4
+    >>> icp = IntCodeProgram(["1108", "10", "10", "4", "-22"])
+    >>> icp._run_instruction()
+    >>> assert icp.command_list == ["1108", "10", "10", "4", "1"]
+    >>> assert icp.position == 4
+    """
+
+    command_params = CommandParams(input_indices=[0, 1], output_indices=[2])
+
+    def execute(self, num1: int, num2: int, out_index: int) -> dict:
+        if num1 == num2:
+            result = "1"
+        else:
+            result = "0"
+        return {out_index: result}
+
+
 class ExitCommand(IntCodeCommand):
     """Exit command just quits everything"""
 
-    def execute(self, *args) -> None:
-        sys.exit(0)
+    def execute(self, *args) -> dict:
+        return {"exit": None}
 
 
 class IntCodeProgram:
@@ -256,10 +290,29 @@ class IntCodeProgram:
         # so we don't modify the input list in place
         self.command_list: List[str] = command_list.copy()
         self.position: int = 0
+        self.is_complete: bool = False
 
     def run(self) -> None:
-        """Run until we reach the exit or encounter an error"""
-        while True:
+        """Run until we reach the exit or encounter an error
+
+        >>> InputCommand.set_default_input("1")
+        >>> icp = IntCodeProgram(["3", "9", "8", "9", "10", "9", "4", "9", "99", "-1", "8"])
+        >>> icp.run()
+        0
+        >>> InputCommand.set_default_input("8")
+        >>> icp = IntCodeProgram(["3", "9", "8", "9", "10", "9", "4", "9", "99", "-1", "8"])
+        >>> icp.run()
+        1
+        >>> InputCommand.set_default_input("29")
+        >>> icp = IntCodeProgram(["3", "3", "1108", "-1", "8", "3", "4", "3", "99"])
+        >>> icp.run()
+        0
+        >>> InputCommand.set_default_input("8")
+        >>> icp = IntCodeProgram(["3", "3", "1108", "-1", "8", "3", "4", "3", "99"])
+        >>> icp.run()
+        1
+        """
+        while not self.is_complete:
             self._run_instruction()
 
     def _run_instruction(self) -> None:
@@ -292,6 +345,9 @@ class IntCodeProgram:
             if index == "position":
                 self.position = value
                 has_jumped = True
+            # special handling for exit
+            elif index == "exit":
+                self.is_complete = True
             else:
                 self.command_list[index] = value
         # increment the position appropriately
